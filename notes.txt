@@ -1,0 +1,9 @@
+Questions pour Mewena :
+- logiciel pour sauvegarder ses morceaux de codes, excel, JS, CSS, html,....
+
+Notes TC:
+- Cliquer sur supprimer efface l'article => en cours
+- Cliquer sur le input +/- ajuste la quantité et le prix => en cours
+- Rectifier ajout de Kanap si localstorage vide => bug
+
+kanap sinopé - blue - 2 - 1849 € / canap
