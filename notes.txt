@@ -4,6 +4,8 @@ Questions pour Mewena :
 Notes TC:
 - Cliquer sur supprimer efface l'article => en cours
 - Cliquer sur le input +/- ajuste la quantité et le prix => en cours
-- Rectifier ajout de Kanap si localstorage vide => bug
+- problème si champs mal renseigné, efface tout
+- cas si panier vide
 
-kanap sinopé - blue - 2 - 1849 € / canap
+
+

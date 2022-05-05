@@ -60,6 +60,7 @@ function addToPanier()
             alert('pas de quantité renseignée')
             return false
             }
+
         //si array n'existe pas
         let mySelectionProducts=[]
         if (localStorage.getItem("myOrder") === null) 
@@ -75,14 +76,15 @@ function addToPanier()
             alert("Produit ajouté au panier")
             }
         //Si array existe
-        else 
+        else
             {
             //Si la référence est en doublon
                 mySelectionProducts=JSON.parse(window.localStorage.getItem("myOrder"))
                 const valeurTrouvee = mySelectionProducts.find(element => element.productId == id && element.productColor ==  document.getElementById('colors').options[document.getElementById('colors').selectedIndex].value )
-                newValueQuantity=parseInt(valeurTrouvee.productQuantity) + parseInt(document.getElementById("quantity").value)
+             
                 if(valeurTrouvee)  //enlever element du tableau et créer une nouvelle cart item
                     {               
+                    newValueQuantity=parseInt(valeurTrouvee.productQuantity) + parseInt(document.getElementById("quantity").value)
                     var myArray = mySelectionProducts;
                     var myIndex = mySelectionProducts.indexOf(valeurTrouvee);
                     if (myIndex !== -1) 
@@ -100,7 +102,7 @@ function addToPanier()
                     alert("Produit ajouté au panier")
                     }
                 //Si référence n'est pas en doublon
-                else 
+                else
                 {
                     var myKanapArray = localStorage.getItem("myOrder");
                     var myKanapArrayJson = JSON.parse(myKanapArray)
@@ -121,5 +123,4 @@ function addToPanier()
 document
     .getElementById("addToCart")
     .addEventListener("click", addToPanier)
-
 console.log(JSON.parse(window.localStorage.getItem("myOrder")))
