@@ -69,7 +69,7 @@ function createPanier()
                     let Psupprimer = document.createElement('p')
                     Psupprimer.textContent = "Supprimer"
                     Psupprimer.className = "deleteItem"
-                            
+                    Psupprimer.id= `delete-${myFinalID}-${myKanapArrayJson[myFinalCompteur].productColor}`                           
                     //Intégrer dans le HTML
                     document.getElementById("cart__items").appendChild(newItemToBuy)
                     newItemToBuy.appendChild(newDivcartItemImg)
@@ -102,6 +102,8 @@ function verificationInput()
     {
         var reg1 = new RegExp("^([A-Za-z])+$")/*regexp qui contrôle s'il y a des lettres sans chiffres ou caractères spéciaux*/
         var reg2 = new RegExp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$")/*regexp qui contrôle pour une adresse mail*/
+        //Panier vide
+            //Pris en compte automatiquement car myCompteurtobuy = null
         //FirstName
         if (document.getElementById('firstName').value == "")
             {document.getElementById('firstNameErrorMsg').innerHTML="Veuillez renseigner un prénom"
@@ -149,21 +151,54 @@ function verificationInput()
             document.getElementById('emailErrorMsg').innerHTML=""}
         //Si tout est OK
         createFormulaireFinal()
+       
+        //envoi vers formulaire
+
     }
 
-//Fonction de création formulaire final --------------------------------------------------------------------------------------
+//Fonction de création formulaire final + envoi requete --------------------------------------------------------------------------------------
 function createFormulaireFinal()
     {
-        const formulaireCommande = 
+        console.log(JSON.stringify({
+            contact: 
+            {
+                firstName: document.getElementById("firstName").value,
+                lastName: document.getElementById("lastName").value,
+                address: document.getElementById("address").value,
+                city: document.getElementById("city").value,
+                email: document.getElementById("email").value,
+            },
+            products: myKanapArrayJson.map(item => item.productId)
+        }))
+        
+        fetch("http://localhost:3000/api/products/order", 
         {
-            firstName: document.getElementById("firstName").value,
-            lastName: document.getElementById("lastName").value,
-            adress: document.getElementById("address").value,
-            city: document.getElementById("city").value,
-            email: document.getElementById("email").value,
-        }
-        localStorage.setItem("contact", JSON.stringify(formulaireCommande));
-        alert("Formulaire créé")
+            method: "post",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+                contact: 
+                {
+                    firstName: document.getElementById("firstName").value,
+                    lastName: document.getElementById("lastName").value,
+                    address: document.getElementById("address").value,
+                    city: document.getElementById("city").value,
+                    email: document.getElementById("email").value,
+                },
+                products: myKanapArrayJson.map(item => item.productId)
+            }),
+        })
+            .then(response => response.json())
+                .then(json => console.log(json))
+   
+        // A finaliser ici
+
+                    .then(redirectionURL => window.location.assign("confirmation.html?order="+ toto))
+            .catch((error) => {console.log('Error');})
+            alert("Merci de votre achat, votre commande est validée")
     }
 
 //Au chargement de la page----------------------------------------------------------------------------------------
@@ -172,67 +207,23 @@ totalPrice=0
 totalQuantiteKanap= 0
 createPanier()
 
-//Modifier une quantité -------------------------------------------------------------------------------------------
-
-//Supprimer un article --------------------------------------------------------------------------------------------
-
 //Valider le formulaire-------------------------------------------------------------------------------------------
 document
 .getElementById("order")
 .addEventListener("click", verificationInput)
 
-
-
-
-
-
-
-
-
-
 //---------Zone de test--------------------------------------------------------------------------------------
-    //Fonction POST pour l'API
-function postSurAPI(){
-    fetch("http://localhost:3000/api/products/order", 
-    
-    {
-    method: 'POST',
-    body: localStorage.getItem('contact'),
-    headers:{
-        "Content-Type":'application/json',
-    }
-})
-}
-
-//Supprimer article à finir
-
-function supprimerKanap()
-{
-    //Nb de classes
-    var nb_delete_item;
-    nb_delete_item=$(".deleteItem").length;
-    console.log(nb_delete_item); // 👉️ div.parent
-    //alert("clic efectué")
+var toto =8 // à supprimer par la suite
 
 
-    // Trouver classe actuelle
-    nb_delete_item2=$(".deleteItem")[2]
-    console.log(nb_delete_item2)
-}
+    //Modifier une quantité -------------------------------------------------------------------------------------------
 
-document
-.getElementById("cart__items")
-.addEventListener("click", supprimerKanap)
+    //Supprimer un article --------------------------------------------------------------------------------------------
+    //console.log(this.closest("div.cart__item__content").querySelector("div.cart__item__content__description > h2").innerText)
+    //console.log(this.closest("div.cart__item__content").querySelector("div.cart__item__content__description > p").innerText)
 
-// - var i = 0;
-// - tu fais un foreach
-// - tu fais une condition qui compare un getElementByClassName a un getElementByTagName
-// - si la condition est vrai tu incrémente la variable i 
 
- 
-//modification qté à finir
-// newPPrice.textContent = choixindex.price*myKanapArrayJson[myFinalCompteur].productQuantity + " €"
-//415b7cacb65d43b2b5c1ff70f3393ad1
+
 
 //------------Fin zone de test-----------------------------------------------------------------------------------
 

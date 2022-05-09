@@ -114,7 +114,7 @@ function addToPanier()
                         }
                     mySelectionProducts.push (cartitem)
                     localStorage.setItem("myOrder", JSON.stringify(mySelectionProducts));
-                    alert("Produit ajouté au panier")
+                    alert("Votre article a été ajouté au panier")
                 }
             }
     }
@@ -123,4 +123,3 @@ function addToPanier()
 document
     .getElementById("addToCart")
     .addEventListener("click", addToPanier)
-console.log(JSON.parse(window.localStorage.getItem("myOrder")))
