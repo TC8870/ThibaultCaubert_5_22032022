@@ -1,23 +1,12 @@
-//Récupérer le Array du local storage
-var myKanapArray = localStorage.getItem("myOrder");
-var myKanapArrayJson = JSON.parse(myKanapArray)
-
-//trouver le nombre de références
-myCompteurtobuy = myKanapArrayJson.length
-
 //Fonction de création panier----------------------------------------------------------------------------------------------
-function createPanier()
-    {
-        for (let myFinalCompteur = 0; myFinalCompteur < myCompteurtobuy; myFinalCompteur++) 
-        {
-            //Trouver ID + color + qté avant édition HTML
-            myFinalID = myKanapArrayJson[myFinalCompteur].productId
-            promesse = fetch(" http://localhost:3000/api/products/" + myFinalID)
-            .then((reponse) => 
-            {
+function createPanier() {
+    for (let myFinalCompteur = 0; myFinalCompteur < myCompteurtobuy; myFinalCompteur++) {
+        //Trouver ID + color + qté avant édition HTML
+        myFinalID = myKanapArrayJson[myFinalCompteur].productId
+        promesse = fetch(" http://localhost:3000/api/products/" + myFinalID)
+            .then((reponse) => {
                 usersData = reponse.json();
-                usersData.then((choixindex) => 
-                {
+                usersData.then((choixindex) => {
                     //Création Article
                     let newItemToBuy = document.createElement('ARTICLE')
                     newItemToBuy.className = "cart__item"
@@ -44,7 +33,7 @@ function createPanier()
                     newPColor.textContent = myKanapArrayJson[myFinalCompteur].productColor
                     //Création PPrice
                     let newPPrice = document.createElement('p')
-                    newPPrice.textContent = choixindex.price*myKanapArrayJson[myFinalCompteur].productQuantity + " €"
+                    newPPrice.textContent = choixindex.price * myKanapArrayJson[myFinalCompteur].productQuantity + " €"
                     //Création Div cart__item__content__settings
                     let newDivcartItemContentsettings = document.createElement('div')
                     newDivcartItemContentsettings.className = "cart__item__content__settings"
@@ -62,6 +51,23 @@ function createPanier()
                     newInputNumber.setAttribute('min', 1)
                     newInputNumber.setAttribute('max', 100)
                     newInputNumber.setAttribute('value', myKanapArrayJson[myFinalCompteur].productQuantity)
+                    //Evènement au changement de quantité (=remplacement dans le array)
+                    newInputNumber.addEventListener('change', eventChangeQuantity => {
+                        mySelectionProducts = JSON.parse(window.localStorage.getItem("myOrder"))
+                        var myArray = mySelectionProducts;
+                        var myIndex = mySelectionProducts.indexOf(myFinalCompteur);
+                        console.log(myIndex)
+                        myArray.splice(myIndex, 1);
+                        const cartitem =
+                        {
+                            productId: myFinalID,
+                            productColor: myKanapArrayJson[myFinalCompteur].productColor,
+                            productQuantity: parseInt(newInputNumber.value)
+                        }
+                        mySelectionProducts.push(cartitem)
+                        localStorage.setItem("myOrder", JSON.stringify(mySelectionProducts));
+                        location.reload()
+                    })
                     //Création Div cart__item__content__settings__delete
                     let newDivcartItemContentsettingsdelete = document.createElement('div')
                     newDivcartItemContentsettingsdelete.className = "cart__item__content__settings__delete"
@@ -69,7 +75,17 @@ function createPanier()
                     let Psupprimer = document.createElement('p')
                     Psupprimer.textContent = "Supprimer"
                     Psupprimer.className = "deleteItem"
-                    Psupprimer.id= `delete-${myFinalID}-${myKanapArrayJson[myFinalCompteur].productColor}`                           
+                    //Evènement au clic sur "supprimer" (=suppression dans le array)
+                    Psupprimer.addEventListener('click', eventDeleteItem => {
+                        mySelectionProducts = JSON.parse(window.localStorage.getItem("myOrder"))
+                        var myArray = mySelectionProducts;
+                        var myIndex = mySelectionProducts.indexOf(myFinalCompteur);
+                        console.log(myIndex)
+                        myArray.splice(myIndex, 1);
+                        localStorage.setItem("myOrder", JSON.stringify(mySelectionProducts));
+                        alert("Produit supprimé du panier")
+                        location.reload()
+                    })
                     //Intégrer dans le HTML
                     document.getElementById("cart__items").appendChild(newItemToBuy)
                     newItemToBuy.appendChild(newDivcartItemImg)
@@ -86,101 +102,97 @@ function createPanier()
                     newDivcartItemContentsettings.appendChild(newDivcartItemContentsettingsdelete)
                     newDivcartItemContentsettingsdelete.appendChild(Psupprimer)
                     //Trouver quantité totale
-                    totalQuantiteKanap= totalQuantiteKanap+myKanapArrayJson[myFinalCompteur].productQuantity
-                    document.getElementById('totalQuantity').innerHTML=totalQuantiteKanap
+                    totalQuantiteKanap = totalQuantiteKanap + myKanapArrayJson[myFinalCompteur].productQuantity
+                    document.getElementById('totalQuantity').innerHTML = totalQuantiteKanap
                     //Trouver prix total
-                    totalPrice=totalPrice+myKanapArrayJson[myFinalCompteur].productQuantity*choixindex.price
-                    document.getElementById('totalPrice').innerHTML=totalPrice
-                }) 
+                    totalPrice = totalPrice + myKanapArrayJson[myFinalCompteur].productQuantity * choixindex.price
+                    document.getElementById('totalPrice').innerHTML = totalPrice
+                })
                     //Si erreur
                     .catch((err) => console.log("ERREUR PROMESSE PRIX"))
             })
-        }}
+    }
+}
 
 //Fonction validation panier--------------------------------------------------------------------------------------
-function verificationInput()
-    {
-        var reg1 = new RegExp("^([A-Za-z])+$")/*regexp qui contrôle s'il y a des lettres sans chiffres ou caractères spéciaux*/
-        var reg2 = new RegExp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$")/*regexp qui contrôle pour une adresse mail*/
-        //Panier vide
-            //Pris en compte automatiquement car myCompteurtobuy = null
-        //FirstName
-        if (document.getElementById('firstName').value == "")
-            {document.getElementById('firstNameErrorMsg').innerHTML="Veuillez renseigner un prénom"
-            return false}    
-        var testName = reg1.test(document.getElementById('firstName').value)   
-        if (!testName){
-            document.getElementById('firstNameErrorMsg').innerHTML="Vous ne devez pas inscrire de chiffres ou caractères spéciaux"
-            return false}
-        if (testName){
-                document.getElementById('firstNameErrorMsg').innerHTML=""}    
-        //LastName
-        if (document.getElementById('lastName').value == "")
-            {document.getElementById('lastNameErrorMsg').innerHTML="Veuillez renseigner un nom"
-            return false}
-        var testLastName = reg1.test(document.getElementById('lastName').value)   
-        if (!testLastName){
-            document.getElementById('lastNameErrorMsg').innerHTML="Vous ne devez pas inscrire de chiffres ou caractères spéciaux"
-            return false}
-        if (testLastName){
-                document.getElementById('lastNameErrorMsg').innerHTML=""}
-        //Adresse
-        if (document.getElementById('address').value == "")
-            {document.getElementById('addressErrorMsg').innerHTML="Veuillez renseigner une adresse"
-            return false}
-        else(document.getElementById('addressErrorMsg').innerHTML="")
-        //Ville
-        if (document.getElementById('city').value == "")
-            {document.getElementById('cityErrorMsg').innerHTML="Veuillez renseigner une ville"
-            return false}
-        var testCity = reg1.test(document.getElementById('city').value)   
-        if (!testCity){
-            document.getElementById('cityErrorMsg').innerHTML="Vous ne devez pas inscrire de chiffres ou caractères spéciaux"
-            return false}
-        if (testCity){
-            document.getElementById('cityErrorMsg').innerHTML=""}
-        //Email
-        if (document.getElementById('email').value == "" )
-            {document.getElementById('emailErrorMsg').innerHTML="Veuillez renseigner un email"
-            return false}
-        var testEmail = reg2.test(document.getElementById('email').value)   
-        if (!testEmail){
-            document.getElementById('emailErrorMsg').innerHTML="Veuillez renseigner un email valide"
-            return false}
-        if (testEmail){
-            document.getElementById('emailErrorMsg').innerHTML=""}
-        //Si tout est OK
-        createFormulaireFinal()
-       
-        //envoi vers formulaire
-
+function verificationInput() {
+    var reg1 = new RegExp("^([A-Za-z])+$")/*regexp qui contrôle s'il y a des lettres sans chiffres ou caractères spéciaux*/
+    var reg2 = new RegExp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$")/*regexp qui contrôle pour une adresse mail*/
+    //Panier vide
+    //Pris en compte automatiquement car myCompteurtobuy = null
+    //FirstName
+    if (document.getElementById('firstName').value == "") {
+        document.getElementById('firstNameErrorMsg').innerHTML = "Veuillez renseigner un prénom"
+        return false
     }
+    var testName = reg1.test(document.getElementById('firstName').value)
+    if (!testName) {
+        document.getElementById('firstNameErrorMsg').innerHTML = "Vous ne devez pas inscrire de chiffres ou caractères spéciaux"
+        return false
+    }
+    if (testName) {
+        document.getElementById('firstNameErrorMsg').innerHTML = ""
+    }
+    //LastName
+    if (document.getElementById('lastName').value == "") {
+        document.getElementById('lastNameErrorMsg').innerHTML = "Veuillez renseigner un nom"
+        return false
+    }
+    var testLastName = reg1.test(document.getElementById('lastName').value)
+    if (!testLastName) {
+        document.getElementById('lastNameErrorMsg').innerHTML = "Vous ne devez pas inscrire de chiffres ou caractères spéciaux"
+        return false
+    }
+    if (testLastName) {
+        document.getElementById('lastNameErrorMsg').innerHTML = ""
+    }
+    //Adresse
+    if (document.getElementById('address').value == "") {
+        document.getElementById('addressErrorMsg').innerHTML = "Veuillez renseigner une adresse"
+        return false
+    }
+    else (document.getElementById('addressErrorMsg').innerHTML = "")
+    //Ville
+    if (document.getElementById('city').value == "") {
+        document.getElementById('cityErrorMsg').innerHTML = "Veuillez renseigner une ville"
+        return false
+    }
+    var testCity = reg1.test(document.getElementById('city').value)
+    if (!testCity) {
+        document.getElementById('cityErrorMsg').innerHTML = "Vous ne devez pas inscrire de chiffres ou caractères spéciaux"
+        return false
+    }
+    if (testCity) {
+        document.getElementById('cityErrorMsg').innerHTML = ""
+    }
+    //Email
+    if (document.getElementById('email').value == "") {
+        document.getElementById('emailErrorMsg').innerHTML = "Veuillez renseigner un email"
+        return false
+    }
+    var testEmail = reg2.test(document.getElementById('email').value)
+    if (!testEmail) {
+        document.getElementById('emailErrorMsg').innerHTML = "Veuillez renseigner un email valide"
+        return false
+    }
+    if (testEmail) {
+        document.getElementById('emailErrorMsg').innerHTML = ""
+    }
+    //Si tout est OK
+    createFormulaireFinal()
+}
 
 //Fonction de création formulaire final + envoi requete --------------------------------------------------------------------------------------
-function createFormulaireFinal()
-    {
-        console.log(JSON.stringify({
-            contact: 
-            {
-                firstName: document.getElementById("firstName").value,
-                lastName: document.getElementById("lastName").value,
-                address: document.getElementById("address").value,
-                city: document.getElementById("city").value,
-                email: document.getElementById("email").value,
-            },
-            products: myKanapArrayJson.map(item => item.productId)
-        }))
-        
-        fetch("http://localhost:3000/api/products/order", 
+function createFormulaireFinal() {
+    fetch("http://localhost:3000/api/products/order",
         {
             method: "post",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-
             body: JSON.stringify({
-                contact: 
+                contact:
                 {
                     firstName: document.getElementById("firstName").value,
                     lastName: document.getElementById("lastName").value,
@@ -191,41 +203,30 @@ function createFormulaireFinal()
                 products: myKanapArrayJson.map(item => item.productId)
             }),
         })
-            .then(response => response.json())
-                .then(json => console.log(json))
-   
-        // A finaliser ici
-
-                    .then(redirectionURL => window.location.assign("confirmation.html?order="+ toto))
-            .catch((error) => {console.log('Error');})
-            alert("Merci de votre achat, votre commande est validée")
-    }
+        .then(response => response.json())
+        .then(json => window.location.assign("confirmation.html?order=" + json.orderId))
+        .catch((error) => { console.log(error); })
+    alert("Merci de votre achat, votre commande est validée")
+}
 
 //Au chargement de la page----------------------------------------------------------------------------------------
+//Récupérer le Array du local storage
+var myKanapArray = localStorage.getItem("myOrder");
+var myKanapArrayJson = JSON.parse(myKanapArray)
+
+//trouver le nombre de références
+myCompteurtobuy = myKanapArrayJson.length
+
 //Initialisation des compteurs + affichage du panier
-totalPrice=0
-totalQuantiteKanap= 0
+totalPrice = 0
+totalQuantiteKanap = 0
 createPanier()
 
 //Valider le formulaire-------------------------------------------------------------------------------------------
 document
-.getElementById("order")
-.addEventListener("click", verificationInput)
-
-//---------Zone de test--------------------------------------------------------------------------------------
-var toto =8 // à supprimer par la suite
-
-
-    //Modifier une quantité -------------------------------------------------------------------------------------------
-
-    //Supprimer un article --------------------------------------------------------------------------------------------
-    //console.log(this.closest("div.cart__item__content").querySelector("div.cart__item__content__description > h2").innerText)
-    //console.log(this.closest("div.cart__item__content").querySelector("div.cart__item__content__description > p").innerText)
+    .getElementById("order")
+    .addEventListener("click", verificationInput)
 
 
 
 
-//------------Fin zone de test-----------------------------------------------------------------------------------
-
-
-    
